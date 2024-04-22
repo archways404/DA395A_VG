@@ -56,26 +56,26 @@ async function getTestData(exampleData, searchTerm) {
 	}
 }
 
-/*
-//! TEMP FETCHING DATA FROM 123MOVIES
-try {
-const response = await fetch(
-  'https://ww3.123moviesfree.net/searching?q=star wars&limit=40&offset=0',
-  {
-    method: 'GET',
-  }
-);
-const result = await response.json();
+async function get123MoviesData(searchTerm) {
+	try {
+		const response = await fetch(
+			`https://ww3.123moviesfree.net/searching?q=${searchTerm}&limit=40&offset=0`,
+			{
+				method: 'GET',
+			}
+		);
+		const result = await response.json();
 
-console.log(result);
-} catch (error) {
-console.error(error);
+		console.log(result);
+		return result;
+	} catch (error) {
+		console.error(error);
+		return error;
+	}
 }
-res.json(responseData);
-
-*/
 
 module.exports = {
 	getStreamingData,
 	getTestData,
+	get123MoviesData,
 };

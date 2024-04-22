@@ -1,6 +1,6 @@
 {
 	"name": "run-install-script",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"scripts": {
 		"install": "concurrently \"cd SERVER && npm install\" \"cd UI && npm install\"",
 		"dev": "concurrently \"cd SERVER && npm run dev\" \"cd UI && npm run dev\"",
