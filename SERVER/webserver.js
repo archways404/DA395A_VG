@@ -2,14 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-/*
-  * [ TODO ]
-  * BREAK DOWN THE LOGIC INTO FUNCTIONS
-  * IMPLEMENT THE 123MOVIES DATA FETCHING & PARSING LOGIC
-*/
-
 //? IMPORTING THE EXAMPLE_SEARCH.JSON FILE
 const exampleData = require('./example_search.json');
+
+const { getStreamingData, getTestData } = require('./functions/requests');
 
 //? INIT DOTENV AND LOAD VALUES INTO VARIABLES
 dotenv.config();
@@ -37,37 +33,23 @@ app.get('/', async (req, res) => {
 
 app.post('/endpoint', async (req, res) => {
 	const searchTerm = req.body.searchTerm;
-
-	/*
-	 * COMMENTED OUT FOR TESTING PURPOSES
-	 * THE API ONLY ALLOWS FOR 100 REQUESTS PER DAY
-   * 
-	// const userLocation = req.body.userLocation;
-	//! ONLY FOR TESTING
+	//const userLocation = req.body.userLocation;
 	const userLocation = 'se';
-	console.log('searchTerm:', searchTerm);
-
-	const url = `https://streaming-availability.p.rapidapi.com/search/title?country=se&title=${searchTerm}&output_language=en&show_type=all`;
-
-	const options = {
-		method: 'GET',
-		headers: {
-			'X-RapidAPI-Key': apiKEY,
-			'X-RapidAPI-Host': apiHOST,
-		},
-	};
 
 	try {
-		const response = await fetch(url, options);
-		const result = await response.json();
-
-		console.log(result);
+		const data = await getStreamingData(
+			searchTerm,
+			userLocation,
+			apiKEY,
+			apiHOST
+		);
+		res.json(data);
 	} catch (error) {
 		console.error(error);
 	}
-	res.json({ searchTerm });
-  */
 
+	// TESTING
+	/*
 	try {
 		const filteredData = exampleData.result.find((item) =>
 			item.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -88,7 +70,6 @@ app.post('/endpoint', async (req, res) => {
 			console.log('Services and Types:', JSON.stringify(services, null, 2));
 			console.log('responseData:', JSON.stringify(responseData, null, 2));
 
-			/*
 			//! TEMP FETCHING DATA FROM 123MOVIES
 			try {
 				const response = await fetch(
@@ -103,17 +84,33 @@ app.post('/endpoint', async (req, res) => {
 			} catch (error) {
 				console.error(error);
 			}
-      */
-
 			res.json(responseData);
+
 		} else {
 			res.status(404).send('No data found for the given search term');
 		}
 	} catch (error) {
 		console.error(error);
 		res.status(500).send('Error processing request');
+  }
+  //! TEMP FETCHING DATA FROM 123MOVIES
+  */
+});
+
+app.post('/testendpoint', async (req, res) => {
+	const searchTerm = req.body.searchTerm;
+	const userLocation = 'se'; // Not used in getTestData but kept for structure
+
+	try {
+		const data = await getTestData(exampleData, searchTerm);
+		console.log(data); // Log to verify data structure
+		res.json(data); // Send the actual data
+	} catch (error) {
+		console.error(error);
+		res.status(500).send('Server error processing request');
 	}
 });
+
 
 app.listen(PORT, async () => {
 	console.log(`Server listening on port ${PORT}`);
