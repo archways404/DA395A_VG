@@ -4,12 +4,15 @@ const dotenv = require('dotenv');
 
 //? IMPORTING THE EXAMPLE_SEARCH.JSON FILE
 const exampleData = require('./example_search.json');
+const unavailableExampleData = require('./example_search_the_wire.json');
 
 //? IMPORTING THE REQUEST FUNCTIONS FROM THE REQUESTS.JS FILE
 const {
 	getStreamingData,
 	getTestData,
 	get123MoviesData,
+	integrate123Movies,
+	getAllStreamingData,
 } = require('./functions/requests');
 
 //? INIT DOTENV AND LOAD VALUES INTO VARIABLES
@@ -38,9 +41,7 @@ app.get('/', async (req, res) => {
 
 app.post('/endpoint', async (req, res) => {
 	const searchTerm = req.body.searchTerm;
-	//const userLocation = req.body.userLocation;
 	const userLocation = 'se';
-
 	try {
 		const data = await getStreamingData(
 			searchTerm,
@@ -48,20 +49,49 @@ app.post('/endpoint', async (req, res) => {
 			apiKEY,
 			apiHOST
 		);
+
+		const movies123Data = await get123MoviesData(searchTerm);
+		if (movies123Data && movies123Data.data) {
+			data.services.push({
+				service: '123movies',
+				streamingType: 'free',
+				seasons: movies123Data.data.map((season) => ({
+					title: season.t,
+					episodes: season.e,
+					quality: season.q,
+					year: season.y,
+					link: `https://ww3.123moviesfree.net/season/${season.s}`,
+				})),
+			});
+		}
+
 		res.json(data);
 	} catch (error) {
 		console.error(error);
+		res.status(500).send('Server error processing request');
 	}
 });
 
 app.post('/testendpoint', async (req, res) => {
 	const searchTerm = req.body.searchTerm;
-	const userLocation = 'se'; // Not used in getTestData but kept for structure
-
+	const userLocation = 'se';
 	try {
 		const data = await getTestData(exampleData, searchTerm);
-		console.log(data); // Log to verify data structure
-		res.json(data); // Send the actual data
+		const movies123Data = await get123MoviesData(searchTerm);
+		if (movies123Data && movies123Data.data) {
+			data.services.push({
+				service: '123movies',
+				streamingType: 'free',
+				seasons: movies123Data.data.map((season) => ({
+					title: season.t,
+					episodes: season.e,
+					quality: season.q,
+					year: season.y,
+					link: `https://ww3.123moviesfree.net/season/${season.s}`,
+				})),
+			});
+		}
+		res.json(data);
 	} catch (error) {
 		console.error(error);
 		res.status(500).send('Server error processing request');

@@ -2,14 +2,15 @@ import { useState } from 'react';
 
 function SearchBox() {
 	const [inputValue, setInputValue] = useState('');
-	const [data, setData] = useState(null); // State to store the fetched data
-
+	const [data, setData] = useState(null); 
+	const [toggleSeasons, setToggleSeasons] = useState({});
 	const handleInputChange = (event) => {
 		setInputValue(event.target.value);
 	};
 
 	const handleSubmit = (event) => {
 		event.preventDefault();
+		//fetch('http://localhost:3000/testendpoint', {
 		fetch('http://localhost:3000/endpoint', {
 			method: 'POST',
 			headers: {
@@ -25,6 +26,10 @@ function SearchBox() {
 			.catch((error) => {
 				console.error('Error:', error);
 			});
+	};
+
+	const handleToggleSeasons = (service) => {
+		setToggleSeasons((prev) => ({ ...prev, [service]: !prev[service] }));
 	};
 
 	return (
@@ -53,9 +58,7 @@ function SearchBox() {
 					</h3>
 					<ul className="list-disc pl-5">
 						{data.services.map((service, index) => (
-							<li
-								key={index}
-								className="mt-2">
+							<li key={index}>
 								<strong>Service:</strong> {service.service} (
 								{service.streamingType})
 								<br />
@@ -74,6 +77,30 @@ function SearchBox() {
 										className="ml-4 text-blue-500 hover:underline">
 										Direct Video Link
 									</a>
+								)}
+								{service.seasons && (
+									<div>
+										<button
+											onClick={() => handleToggleSeasons(service.service)}
+											className="my-2 text-blue-500 hover:underline">
+											Toggle Seasons
+										</button>
+										{toggleSeasons[service.service] && (
+											<ul>
+												{service.seasons.map((season, sIndex) => (
+													<li key={sIndex}>
+														<a
+															href={season.link}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="text-blue-500 hover:underline">
+															{season.title} ({season.year})
+														</a>
+													</li>
+												))}
+											</ul>
+										)}
+									</div>
 								)}
 							</li>
 						))}
