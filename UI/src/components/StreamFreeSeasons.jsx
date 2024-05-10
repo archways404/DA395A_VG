@@ -1,4 +1,24 @@
+import { useState } from 'react';
+
 function StreamFreeSeasons({ seasonData, onBack }) {
+	const [videoLink, setVideoLink] = useState(null);
+
+	const handleSeasonClick = (videoLink) => {
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ videoLink }),
+		};
+		fetch('http://localhost:3000/testing', requestOptions)
+			.then((response) => response.json())
+			.then((data) => {
+				console.log('Success:', data);
+				setVideoLink(data);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+	};
 	return (
 		<div className="flex flex-col items-center mt-4 mx-auto">
 			<div className="self-start">
@@ -18,7 +38,7 @@ function StreamFreeSeasons({ seasonData, onBack }) {
 							return (
 								<button
 									key={index}
-									onClick={() => window.open(season.link, '_blank')}
+									onClick={() => handleSeasonClick(season.link)}
 									className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow text-sm w-auto"
 									style={{ transition: 'all 0.3s ease' }}>
 									Season {seasonText}
@@ -26,6 +46,15 @@ function StreamFreeSeasons({ seasonData, onBack }) {
 							);
 						})}
 					</div>
+					{videoLink && ( // Conditional rendering of the iframe
+						<iframe
+							src={videoLink}
+							width="800"
+							height="450"
+							frameborder="0"
+							allow="autoplay; fullscreen"
+							allowfullscreen></iframe>
+					)}
 				</div>
 			) : (
 				<p>No seasons available.</p>

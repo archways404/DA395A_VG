@@ -15,6 +15,11 @@ const {
 	getAllStreamingData,
 } = require('./functions/requests');
 
+const {
+	fetchEpisodes,
+	fetchEpisodeVideoLink,
+} = require('./functions/fetchVideo');
+
 //? INIT DOTENV AND LOAD VALUES INTO VARIABLES
 dotenv.config();
 const apiKEY = process.env.API_KEY;
@@ -108,6 +113,16 @@ app.post('/test123', async (req, res) => {
 		console.error(error);
 		res.status(500).send('Server error processing request');
 	}
+});
+
+app.post('/testing', async (req, res) => {
+	const link = req.body.videoLink;
+	console.log(link);
+	const episodes = await fetchEpisodes(link);
+	console.log(episodes);
+	const episodeLinks = await fetchEpisodeVideoLink(link, 'Episode 7');
+	console.log(episodeLinks);
+	res.json(episodeLinks);
 });
 
 
