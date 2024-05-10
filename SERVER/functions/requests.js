@@ -1,5 +1,6 @@
 async function getStreamingData(searchTerm, userLocation, apiKEY, apiHOST) {
-	const url = `https://streaming-availability.p.rapidapi.com/search/title?country=${userLocation}&title=${searchTerm}&output_language=en&show_type=all`;
+	const encodedSearchTerm = encodeURIComponent(searchTerm);
+	const url = `https://streaming-availability.p.rapidapi.com/search/title?country=${userLocation}&title=${encodedSearchTerm}&output_language=en&show_type=all`;
 
 	const options = {
 		method: 'GET',
@@ -11,18 +12,29 @@ async function getStreamingData(searchTerm, userLocation, apiKEY, apiHOST) {
 
 	try {
 		const response = await fetch(url, options);
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 		const result = await response.json();
-		const filteredData = result.result.find((item) =>
+
+		const filteredData = result.result?.find((item) =>
 			item.title.toLowerCase().includes(searchTerm.toLowerCase())
 		);
 
-		if (filteredData) {
-			const services = filteredData.streamingInfo.se.map((service) => ({
-				service: service.service,
-				streamingType: service.streamingType,
-				link: service.link,
-				videoLink: service.videoLink,
-			}));
+		if (filteredData && filteredData.streamingInfo?.se) {
+			const uniqueLinks = new Set();
+			const services = filteredData.streamingInfo.se
+				.filter((service) => {
+					const duplicate = uniqueLinks.has(service.link);
+					uniqueLinks.add(service.link);
+					return !duplicate;
+				})
+				.map((service) => ({
+					service: service.service,
+					streamingType: service.streamingType,
+					link: service.link,
+					videoLink: service.videoLink || '',
+				}));
 
 			const responseData = {
 				originalTitle: filteredData.originalTitle,
@@ -35,13 +47,12 @@ async function getStreamingData(searchTerm, userLocation, apiKEY, apiHOST) {
 			return { error: 'No data found for the given search term' };
 		}
 	} catch (error) {
-		console.error(error);
+		console.error('Fetch error:', error.message);
 		return { error: 'An error occurred during data processing' };
 	}
 }
 
 async function getTestData(exampleData, searchTerm) {
-	// Check if searchTerm is defined and a non-empty string
 	if (!searchTerm || typeof searchTerm !== 'string') {
 		return { error: 'Invalid or missing search term' };
 	}
@@ -50,12 +61,20 @@ async function getTestData(exampleData, searchTerm) {
 			item.title.toLowerCase().includes(searchTerm.toLowerCase())
 		);
 		if (filteredData) {
-			const services = filteredData.streamingInfo.se.map((service) => ({
-				service: service.service,
-				streamingType: service.streamingType,
-				link: service.link,
-				videoLink: service.videoLink,
-			}));
+			const uniqueLinks = new Set(); // Create a Set to track unique links
+			const services = filteredData.streamingInfo.se
+				.filter((service) => {
+					const duplicate = uniqueLinks.has(service.link);
+					uniqueLinks.add(service.link);
+					return !duplicate; // Return true if it's not a duplicate, false otherwise
+				})
+				.map((service) => ({
+					service: service.service,
+					streamingType: service.streamingType,
+					link: service.link,
+					videoLink: service.videoLink,
+				}));
+
 			const responseData = {
 				originalTitle: filteredData.originalTitle,
 				services: services,
