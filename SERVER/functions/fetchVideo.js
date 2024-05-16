@@ -19,23 +19,44 @@ async function fetchEpisodes(link) {
 }
 
 async function fetchEpisodeVideoLink(link, episode_id) {
-	// false for debugging -> Works in headless mode but not in non-headless mode
-	const browser = await puppeteer.launch({ headless: false });
+	const browser = await puppeteer.launch({ headless: true });
 	const page = await browser.newPage();
 	await page.goto(link, { waitUntil: 'networkidle2' });
-	if (await page.$('a#play-now')) {
-		await page.click('a#play-now');
+	async function clickPlayNowAndHandleTabs() {
+		let playNowClicked = false;
+		let retries = 5;
+
+		while (retries > 0) {
+			const pages = await browser.pages();
+			for (const tab of pages) {
+				await tab.bringToFront();
+				try {
+					if (await tab.$('a#play-now')) {
+						await tab.click('a#play-now');
+						playNowClicked = true;
+					}
+				} catch (error) {
+					console.log(`Error clicking 'a#play-now': ${error.message}`);
+				}
+				const otherPages = (await browser.pages()).filter((p) => p !== page);
+				await Promise.all(otherPages.map((p) => p.close()));
+			}
+
+			if (playNowClicked) {
+				retries--;
+			} else {
+				break;
+			}
+		}
 	}
+
+	await clickPlayNowAndHandleTabs();
 	async function processTabs() {
 		const pages = await browser.pages();
 		for (const tab of pages) {
 			await tab.bringToFront();
 			try {
-				if (await page.$('a#play-now')) {
-					await page.click('a#play-now');
-				}
-
-				const videoSrc = await page.evaluate(async (episode_id) => {
+				const videoSrc = await tab.evaluate(async (episode_id) => {
 					const episodeButton = document.querySelector(
 						`button[title="${episode_id}"]`
 					);
@@ -47,6 +68,7 @@ async function fetchEpisodeVideoLink(link, episode_id) {
 					const iframe = document.querySelector('iframe#playit');
 					return iframe ? iframe.src : null;
 				}, episode_id);
+
 				const otherPages = (await browser.pages()).filter((p) => p !== tab);
 				await Promise.all(otherPages.map((p) => p.close()));
 				return videoSrc;
@@ -59,6 +81,7 @@ async function fetchEpisodeVideoLink(link, episode_id) {
 		}
 		return null;
 	}
+
 	let result;
 	do {
 		result = await processTabs();

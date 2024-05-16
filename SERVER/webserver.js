@@ -128,10 +128,6 @@ app.post('/testing', async (req, res) => {
 	const selectedEpisode = req.body.selectedEpisode;
 	console.log(videoLink);
   console.log(selectedEpisode);
-  
-  const episodes = await fetchEpisodes(videoLink);
-  console.log(episodes);
-
   const episodeLinks = await fetchEpisodeVideoLink(videoLink, selectedEpisode);
   console.log(episodeLinks);
   res.json(episodeLinks);
