@@ -115,16 +115,27 @@ app.post('/test123', async (req, res) => {
 	}
 });
 
-app.post('/testing', async (req, res) => {
+app.post('/testing2', async (req, res) => {
 	const link = req.body.videoLink;
 	console.log(link);
 	const episodes = await fetchEpisodes(link);
 	console.log(episodes);
-	const episodeLinks = await fetchEpisodeVideoLink(link, 'Episode 7');
-	console.log(episodeLinks);
-	res.json(episodeLinks);
+	res.json(episodes);
 });
 
+app.post('/testing', async (req, res) => {
+	const videoLink = req.body.videoLink;
+	const selectedEpisode = req.body.selectedEpisode;
+	console.log(videoLink);
+  console.log(selectedEpisode);
+  
+  const episodes = await fetchEpisodes(videoLink);
+  console.log(episodes);
+
+  const episodeLinks = await fetchEpisodeVideoLink(videoLink, selectedEpisode);
+  console.log(episodeLinks);
+  res.json(episodeLinks);
+});
 
 app.listen(PORT, async () => {
 	console.log(`Server listening on port ${PORT}`);
