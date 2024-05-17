@@ -19,7 +19,7 @@ function StreamFreeSeasons({ seasonData, onBack }) {
 				console.log('Success:', data);
 				setSelectedSeason(seasonLink);
 				setEpisodes(data);
-				setVideoLink(null); // Clear any existing video link
+				setVideoLink(null);
 			})
 			.catch((error) => {
 				console.error('Error:', error);
@@ -48,14 +48,14 @@ function StreamFreeSeasons({ seasonData, onBack }) {
 	};
 
 	return (
-		<div className="flex flex-col items-center mt-4 mx-auto">
-			<div className="w-full flex justify-between items-start mb-4">
+		<div className="flex flex-col h-screen">
+			<div className="flex justify-between items-start w-full">
 				<button
 					onClick={onBack}
-					className="text-blue-500 hover:underline pl-5 mb-2">
+					className="text-blue-500 hover:underline mt-4 ml-4">
 					Back to Search Results
 				</button>
-				<div className="flex flex-col items-end">
+				<div className="flex flex-col items-center mt-4 mr-4 h-full">
 					<h2 className="text-xl pb-2">Available Seasons</h2>
 					<div className="flex flex-col items-center gap-2">
 						{seasonData.seasons.map((season, index) => {
@@ -64,7 +64,7 @@ function StreamFreeSeasons({ seasonData, onBack }) {
 								<button
 									key={index}
 									onClick={() => handleSeasonClick(season.link)}
-									className={`py-2 px-4 rounded shadow text-sm w-auto ${
+									className={`py-2 px-4 rounded shadow text-sm w-full ${
 										selectedSeason === season.link
 											? 'bg-green-700 hover:bg-green-900 text-white font-bold'
 											: 'bg-green-500 hover:bg-green-700 text-white font-bold'
@@ -78,42 +78,45 @@ function StreamFreeSeasons({ seasonData, onBack }) {
 				</div>
 			</div>
 
-			<div className="w-full text-center">
-				{videoLink ? (
-					<iframe
-						src={videoLink}
-						width="800"
-						height="450"
-						frameBorder="0"
-						allow="autoplay; fullscreen"
-						allowFullScreen></iframe>
-				) : (
-					<div className="w-800 h-450 bg-gray-200 flex items-center justify-center">
-						<p className="text-gray-500">Video player will appear here</p>
+			<div className="flex flex-grow flex-col justify-center items-center">
+				<div className="flex justify-center">
+					{videoLink ? (
+						<iframe
+							src={videoLink}
+							width="800"
+							height="450"
+							frameBorder="0"
+							allow="autoplay; fullscreen"
+							allowFullScreen></iframe>
+					) : (
+						<div className="w-[800px] h-[450px] bg-gray-200 flex items-center justify-center">
+							<p className="text-gray-500">Video player will appear here</p>
+						</div>
+					)}
+				</div>
+
+				{selectedSeason && episodes.length > 0 && (
+					<div className="w-full text-center mt-4">
+						<h2 className="text-xl pb-5">Episodes</h2>
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 px-4">
+							{episodes.map((episode, episodeIndex) => (
+								<button
+									key={episodeIndex}
+									onClick={() =>
+										handleEpisodeClick(selectedSeason, episode.title)
+									}
+									className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded shadow text-sm"
+									style={{ transition: 'all 0.3s ease' }}>
+									{episode.title}
+								</button>
+							))}
+						</div>
 					</div>
 				)}
 			</div>
-
-			{selectedSeason && episodes.length > 0 && (
-				<div className="w-full text-center mt-4">
-					<h2 className="text-xl pb-5">Episodes</h2>
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-						{episodes.map((episode, episodeIndex) => (
-							<button
-								key={episodeIndex}
-								onClick={() =>
-									handleEpisodeClick(selectedSeason, episode.title)
-								}
-								className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded shadow text-sm"
-								style={{ transition: 'all 0.3s ease' }}>
-								{episode.title}
-							</button>
-						))}
-					</div>
-				</div>
-			)}
 		</div>
 	);
+
 }
 
 export default StreamFreeSeasons;

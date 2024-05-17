@@ -35,11 +35,7 @@ async function fetchEpisodes(link) {
 	}
 
 	await clickPlayNowAndHandleTabs();
-
-	// Increase the timeout period
 	await page.waitForSelector('#eps-list', { timeout: 60000 });
-
-	// Fetch episodes from the episode list
 	const episodes = await page.evaluate(() => {
 		const episodeButtons = Array.from(
 			document.querySelectorAll('#eps-list button')
@@ -52,26 +48,6 @@ async function fetchEpisodes(link) {
 	await browser.close();
 	return episodes;
 }
-
-/*
-async function fetchEpisodes(link) {
-	const browser = await puppeteer.launch();
-	const page = await browser.newPage();
-	await page.goto(link, { waitUntil: 'networkidle2' });
-	await page.click('a#play-now');
-	await page.waitForSelector('#eps-list');
-	const episodes = await page.evaluate(() => {
-		const episodeButtons = Array.from(
-			document.querySelectorAll('#eps-list button')
-		);
-		return episodeButtons.map((button) => ({
-			title: button.title,
-		}));
-	});
-	await browser.close();
-	return episodes;
-}
-*/
 
 async function fetchEpisodeVideoLink(link, episode_id) {
 	const browser = await puppeteer.launch({ headless: true });
