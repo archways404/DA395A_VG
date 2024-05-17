@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faApple } from '@fortawesome/free-brands-svg-icons';
+import { faAmazon } from '@fortawesome/free-brands-svg-icons';
 import { faFilm } from '@fortawesome/free-solid-svg-icons';
 
 function SearchResults({ data, onSelectFreeStream }) {
@@ -18,6 +19,12 @@ function SearchResults({ data, onSelectFreeStream }) {
 							{service.service === 'Apple TV' && (
 								<FontAwesomeIcon
 									icon={faApple}
+									className="text-gray-800 mr-2"
+								/>
+							)}
+							{service.service === 'prime' && (
+								<FontAwesomeIcon
+									icon={faAmazon}
 									className="text-gray-800 mr-2"
 								/>
 							)}
